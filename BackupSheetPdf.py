@@ -36,6 +36,8 @@ ftp_passwd = 'Pd7894560'
 
 # ftp ไดเรกทอรี
 ftp_dir = '/BackupPD/PDF'
+Ftpsuccess_list = 'FtpSuccess.txt'
+Ftpfailed_list = 'FtpFailed.txt'
 
 def main():
     while True:
@@ -204,10 +206,15 @@ def upload_files_ftp(directory_path, target_dir):
                 file = open(file_path, 'rb')
                 ftp.storbinary('STOR ' + file_name, file)
                 file.close()
+                backupList(Ftpfailed_list, file_name)
+                backupList(Ftpsuccess_list, file_name, "add")
                 print(f"อัพโหลดไฟล์ {file_name} สำเร็จ")
+                logging.info(f"ftp_backup_success {file_name}")
                 success_count += 1
             except Exception as e:
+                backupList(Ftpfailed_list, file_name, "add")
                 print(f"เกิดข้อผิดพลาดในการอัพโหลดไฟล์ {file_name}: {str(e)}")
+                logging.error(f"ftp_backup_error {file_name}")
                 failure_count += 1
         else:
             print(f"ไฟล์ {file_name} มีอยู่แล้วในไดเรกทอรีเป้าหมาย")

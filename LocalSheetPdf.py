@@ -25,9 +25,9 @@ TOKEN_DIR = 'token.pickle'
 
 # กำหนด path ของโฟล์เดอร์ที่ต้องการบันทึกไฟล์ PDF
 setting_json = "setting.json"
-pdf_folder = 'D:\Backup_GGSH_PDF_Linux\PDF'
-success_list = 'BackupSuccess.txt'
-failed_list = 'BackupFailed.txt'
+pdf_folder = '/mnt/raid/PDF'
+success_list = 'LocalSuccess.txt'
+failed_list = 'LocalFailed.txt'
 
 # ข้อมูลการเชื่อมต่อ FTP
 ftp_host = 'pclerp.ddns.net'
@@ -85,6 +85,7 @@ def main():
             print("An error occurred during the download. Reconnecting...")
             breaktime(0, 0, 30) 
 
+# บันทึกไฟล์ที่ดาวน์โหลด อัพโหลด
 def backupList(filename, listname, type="add/remove"):
     # อ่านไฟล์ข้อมูล
     with open(filename, 'r') as file:
@@ -104,6 +105,7 @@ def backupList(filename, listname, type="add/remove"):
     with open(filename, 'w') as file:
         file.write('\n'.join(data))
 
+# หน่วงเวลาการดาวน์โหลดอัพโหลด
 def breaktime(Hours=5, Min=0, Sec=0):
     for i in range((Hours*3600)+(Min*60)+Sec, 0, -1):
         hours = i // 3600  # หารเพื่อหาจำนวนชั่วโมง
@@ -115,6 +117,7 @@ def breaktime(Hours=5, Min=0, Sec=0):
         print(time_str, end='\r')
         sleep(1)
 
+# ดาวน์โหลดไฟล์
 def downloadFile(service, folder_id, folder_name):
     results = [] # เก็บรายการไฟล์
     page_token = None
@@ -172,7 +175,7 @@ def downloadFile(service, folder_id, folder_name):
                     f.write(file.read())
                     backupList(failed_list, file_name)
                     backupList(success_list, file_name, "add")
-                    logging.info(f"backup_success {output_path}")
+                    logging.info(f"local_backup_success {output_path}")
             else:
                 pass
 
@@ -180,14 +183,16 @@ def downloadFile(service, folder_id, folder_name):
             os.system('cls' if os.name == 'nt' else 'clear')
             print("Error", e)
             backupList(failed_list, file_name, "add")
-            logging.error(f"backup_error {output_path}")
+            logging.error(f"local_backup_error {output_path}")
             pass
 
+# ตรวจสอบว่ามีไฟล์อยู่ใน ftp directory หรือไม่
 def check_file_exists(ftp, file_name):
     file_list = []
     ftp.retrlines('NLST', file_list.append)
     return file_name in file_list
 
+# อัพโหลดไฟล์ไปยัง ftp directory
 def upload_files_ftp(directory_path, target_dir):
     ftp = FTP(ftp_host)
     ftp.login(user=ftp_user, passwd=ftp_passwd)
@@ -217,8 +222,7 @@ def upload_files_ftp(directory_path, target_dir):
                 logging.error(f"ftp_backup_error {file_name}")
                 failure_count += 1
         else:
-            print(f"ไฟล์ {file_name} มีอยู่แล้วในไดเรกทอรีเป้าหมาย")
-            failure_count += 1
+            print(f"ไฟล์ {file_name} มีอยู่แล้วในไดเรกทอรี")
 
     ftp.quit()
 

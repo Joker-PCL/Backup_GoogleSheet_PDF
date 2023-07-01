@@ -83,6 +83,7 @@ def main():
             print("<<ERROR>>",e)
             # print("เกิดข้อผิดพลาดระหว่างดาวน์โหลด กำลังเชื่อมต่อไหม่....")
             print("An error occurred during the download. Reconnecting...")
+            logging.error(f"occurred_during_the_download {e}")
             breaktime(0, 0, 30) 
 
 # บันทึกไฟล์ที่ดาวน์โหลด อัพโหลด
